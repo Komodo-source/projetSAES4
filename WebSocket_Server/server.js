@@ -35,7 +35,7 @@ wss.on('connection', (ws) => {
   ws.on('message', (raw) => {
     let data;
     try { data = JSON.parse(raw); } catch (e) { return; }
-
+    if (data.type === 'ping') return;
     if (data.type === 'join') {
       const room = ('' + (data.room_code || '')).toUpperCase();
       if (!room || room.length !== 4) {
