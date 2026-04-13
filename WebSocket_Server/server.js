@@ -64,6 +64,23 @@ wss.on('connection', (ws) => {
 
     const room = ws.meta.room;
     if (!room) { ws.send(JSON.stringify({ type: 'error', message: 'Not joined to any room' })); return; }
+    if (ws.meta.player_id === 'HOST') {
+      if (data.target_id) {
+        const r = rooms.get(room);
+        if (r) {
+          for (const meta of r.sockets) {
+            if (meta.player_id === data.target_id && meta.socket.readyState === WebSocket.OPEN) {
+              meta.socket.send(JSON.stringify(data));
+              break;
+            }
+          }
+        }
+      } else {
+
+        broadcastToRoom(room, data, ws);
+      }
+      return;
+    }
 
     if (data.type === 'chat') {
       broadcastToRoom(room, { type: 'chat', player_name: ws.meta.player_name, message: data.message });
